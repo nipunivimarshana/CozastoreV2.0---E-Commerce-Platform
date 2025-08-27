@@ -142,3 +142,6 @@ cython_debug/
 .idea/
 .vscode/
 *.swp
+
+# Environment variables
+.env
