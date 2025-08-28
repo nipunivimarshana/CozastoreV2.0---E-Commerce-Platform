@@ -54,30 +54,30 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li class="active-menu">
-								<a href="index.html">Home</a>
+								<a href="{% url 'home' %}">Home</a>
 								<ul class="sub-menu">
 									<li><a href="index.html">Homepage 1</a></li>
 								</ul>
 							</li>
 
 							<li>
-								<a href="product.html">Shop</a>
+								<a href="{% url 'shop' %}">Shop</a>
 							</li>
 
 							<li class="label1" data-label1="hot">
-								<a href="shoping-cart.html">Features</a>
+								<a href="{% url 'shopping_cart' %}">Features</a>
 							</li>
 
 							<li>
-								<a href="blog.html">Blog</a>
+								<a href="{% url 'blog' %}">Blog</a>
 							</li>
 
 							<li>
-								<a href="about.html">About</a>
+								<a href="{% url 'about' %}">About</a>
 							</li>
 
 							<li>
-								<a href="contact.html">Contact</a>
+								<a href="{% url 'contact' %}">Contact</a>
 							</li>
 						</ul>
 					</div>	
@@ -110,7 +110,7 @@
 		<div class="wrap-header-mobile">
 			<!-- Logo moblie -->		
 			<div class="logo-mobile">
-				<a href="index.html"><img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO"></a>
+				<a href="{% url 'home' %}"><img src="{% static 'images/icons/logo-01.png' %}" alt="IMG-LOGO"></a>
 			</div>
 
 			<!-- Icon header -->
@@ -141,11 +141,9 @@
 		<div class="menu-mobile">
 			<ul class="main-menu-m">
 				<li>
-					<a href="index.html">Home</a>
+					<a href="{% url 'home' %}">Home</a>
 					<ul class="sub-menu-m">
 						<li><a href="index.html">Homepage 1</a></li>
-						<li><a href="home-02.html">Homepage 2</a></li>
-						<li><a href="home-03.html">Homepage 3</a></li>
 					</ul>
 					<span class="arrow-main-menu-m">
 						<i class="fa fa-angle-right" aria-hidden="true"></i>
@@ -153,7 +151,7 @@
 				</li>
 
 				<li>
-					<a href="product.html">Shop</a>
+					<a href="{% url 'shop' %}">Shop</a>
 				</li>
 
 				<li>
@@ -161,15 +159,15 @@
 				</li>
 
 				<li>
-					<a href="blog.html">Blog</a>
+					<a href="{% url 'blog' %}">Blog</a>
 				</li>
 
 				<li>
-					<a href="about.html">About</a>
+					<a href="{% url 'about' %}">About</a>
 				</li>
 
 				<li>
-					<a href="contact.html">Contact</a>
+					<a href="{% url 'contact' %}">Contact</a>
 				</li>
 			</ul>
 		</div>
@@ -567,7 +565,6 @@
 
 	<!-- Product -->
 	<section class="sec-product bg0 p-t-100 p-b-50">
-		<div class="container">
 			<div class="p-b-32">
 				<h3 class="ltext-105 cl5 txt-center respon1">
 					Store Overview
@@ -1692,7 +1689,6 @@
 
 	<!-- Blog -->
 	<section class="sec-blog bg0 p-t-60 p-b-90">
-		<div class="container">
 			<div class="p-b-66">
 				<h3 class="ltext-105 cl5 txt-center respon1">
 					Our Blogs
@@ -1838,7 +1834,6 @@
 
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
-		<div class="container">
 			<div class="row">
 				<div class="col-sm-6 col-lg-3 p-b-50">
 					<h4 class="stext-301 cl0 p-b-30">
@@ -2007,7 +2002,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 								<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 
 								<div class="slick3 gallery-lb">
-									<div class="item-slick3" data-thumb="images/product-detail-01.jpg">
+									<div class="item-slick3" data-thumb="{% static 'images/product-detail-01.jpg' %}">
 										<div class="wrap-pic-w pos-relative">
 											<img src="{% static 'images/product-detail-01.jpg' %}" alt="IMG-PRODUCT">
 
@@ -2017,7 +2012,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 										</div>
 									</div>
 
-									<div class="item-slick3" data-thumb="images/product-detail-02.jpg">
+									<div class="item-slick3" data-thumb="{% static 'images/product-detail-02.jpg'%}">
 										<div class="wrap-pic-w pos-relative">
 											<img src="{% static 'images/product-detail-02.jpg' %}" alt="IMG-PRODUCT">
 
@@ -2027,7 +2022,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 										</div>
 									</div>
 
-									<div class="item-slick3" data-thumb="images/product-detail-03.jpg">
+									<div class="item-slick3" data-thumb="{% static 'images/product-detail-03.jpg'%} ">
 										<div class="wrap-pic-w pos-relative">
 											<img src="{% static 'images/product-detail-03.jpg' %}" alt="IMG-PRODUCT">
 
