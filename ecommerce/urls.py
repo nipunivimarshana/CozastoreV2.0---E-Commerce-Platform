@@ -8,6 +8,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # This line correctly points core app for the main page
     path('', include('core.urls')),
+    # This will create URLs like /accounts/login/, /accounts/register/, etc.
+     path('accounts/', include('users.urls')),
 ]
 
 if settings.DEBUG:

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'core',
     'users',
     'products',
+    'widget_tweaks',
 
 ]
 
@@ -144,4 +145,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 # Configure custom user model
+
+# ==============================================================================
+# AUTHENTICATION SETTINGS
+# ==============================================================================
+
+# Where to redirect users after a successful login
+LOGIN_REDIRECT_URL = 'home'
+
+# Where to redirect users after they log out
+# (We already handled this in users/urls.py, but this is a good place for it)
+LOGOUT_REDIRECT_URL = 'home'
 
