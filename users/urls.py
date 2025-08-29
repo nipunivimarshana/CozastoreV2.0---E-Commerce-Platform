@@ -1,5 +1,8 @@
 from django.urls import path
 # Import Django's built-in authentication views
+
+app_name = 'users' 
+
 from django.contrib.auth import views as auth_views 
 # Import our custom register view
 from . import views
