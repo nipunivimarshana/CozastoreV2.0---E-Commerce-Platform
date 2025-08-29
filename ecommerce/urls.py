@@ -15,6 +15,7 @@ urlpatterns = [
 
     # This will handle the URL for the product detail page (e.g., /products/classic-white-t-shirt/)
     path('products/', include('products.urls', namespace='products')),
+    
 
     # This must come LAST. It handles the homepage (''), /shop/, /about/, etc.
     path('', include('core.urls')),

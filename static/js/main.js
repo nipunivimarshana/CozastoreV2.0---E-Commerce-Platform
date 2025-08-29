@@ -266,16 +266,45 @@
         });
     });
     
-    /*==================================================================
-    [ Show modal1 ]*/
-    $('.js-show-modal1').on('click',function(e){
-        e.preventDefault();
-        $('.js-modal1').addClass('show-modal1');
-    });
+   /*==================================================================
+[ Show modal1 ]*/
+$('.js-show-modal1').on('click', function(e) {
+    e.preventDefault();
 
-    $('.js-hide-modal1').on('click',function(){
-        $('.js-modal1').removeClass('show-modal1');
-    });
+    // Find the parent .block2 element of the button that was clicked
+    var productBlock = $(this).closest('.block2');
+
+    // Get the data from the data-* attributes you added to the HTML
+    var productName = productBlock.data('product-name');
+    var productPrice = productBlock.data('product-price');
+    var productImageUrl = productBlock.data('product-image-url');
+    var productDescription = productBlock.data('product-description');
+
+    // Find the elements inside the modal by their class names
+    var modal = $('.js-modal1');
+    
+    // Update the content of the modal elements with the data
+    modal.find('.js-name-detail').text(productName); // Updates the product name
+    modal.find('.mtext-106').text('$' + parseFloat(productPrice).toFixed(2)); // Updates the price
+    modal.find('.stext-102.cl3').text(productDescription); // Updates the description
+    
+    // Update the main image in the modal
+    modal.find('.wrap-pic-w img').attr('src', productImageUrl);
+    
+    // This part updates the thumbnails for the modal's own image slider
+    // It's a bit more complex as it needs to handle the slick slider re-initialization
+    var slickTrack = modal.find('.slick3-dots');
+    slickTrack.empty(); // Clear out old thumbnails
+    
+    // This assumes you might have multiple images in the future, for now it just uses the main image
+    var newThumb = '<li><img src="' + productImageUrl + '" alt="IMG-PRODUCT"></li>';
+    slickTrack.append(newThumb);
+
+
+    // Finally, show the modal
+    modal.addClass('show-modal1');
+});
+
 
 
 
