@@ -585,8 +585,13 @@
     {% for product in products %}
     <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ product.category.slug }}">
         <!-- Block2 -->
-        <div class="block2">
-            <div class="block2-pic hov-img0">
+        <div class="block2"
+             data-product-name="{{ product.name }}" 
+             data-product-price="{{ product.price }}"
+             data-product-image-url="{{ product.image.url }}"
+             data-product-description="{{ product.description|truncatewords:30 }}">
+            
+			 <div class="block2-pic hov-img0">
                 {% if product.image %}
                     <!-- Use the product's actual image from the database -->
                     <img src="{{ product.image.url }}" alt="{{ product.name }}">
@@ -604,7 +609,7 @@
                 <div class="block2-txt-child1 flex-col-l ">
                     <!-- Use the product's actual name from the database -->
                     <!-- The href will be fixed in the next feature (Issue #4) -->
-                    <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                    <a href="{% url 'products:product_detail' product.slug %}" class="stext-104 ...">
                         {{ product.name }}
                     </a>
 
