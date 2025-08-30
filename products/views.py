@@ -6,37 +6,40 @@ from django.http import Http404
 
 def product_detail(request, slug):
     # --- DJONGO WORKAROUND to fetch the MAIN product ---
-    # Step 1: Get ALL products with the simplest possible query.
     all_products = Product.objects.all()
-
-    # Step 2: Filter for the specific product in pure Python.
     product_list = [p for p in all_products if p.slug == slug and p.is_available]
-
-    # Step 3: Check if a product was found, otherwise raise a 404 error.
     if not product_list:
         raise Http404("Product does not exist or is unavailable")
     product = product_list[0]
     # --- END OF WORKAROUND ---
 
-    # --- RECOMMENDATION LOGIC ---
+    # --- 1. TEXT-BASED RECOMMENDATIONS (Content Similarity) ---
     try:
         with open('recommendations.json', 'r') as f:
-            all_recommendations = json.load(f)
-        
-        recommended_ids = all_recommendations.get(str(product.id), [])
-        
-        # This part is already using the safe, Python-based filter, which is great.
-        recommended_products = [p for p in all_products if p.id in recommended_ids]
-
+            all_text_recs = json.load(f)
+        text_rec_ids = all_text_recs.get(str(product.id), [])
+        text_recommended_products = [p for p in all_products if p.id in text_rec_ids]
     except (FileNotFoundError, json.JSONDecodeError):
-        # Fallback logic using a safe Python filter
+        # Fallback to simple category-based logic
         all_category_products = [p for p in all_products if p.category == product.category and p.is_available and p.id != product.id]
-        recommended_products = all_category_products[:4]
-    # --- END OF RECOMMENDATION LOGIC ---
+        text_recommended_products = all_category_products[:4]
     
+    # --- 2. IMAGE-BASED RECOMMENDATIONS (Visual Similarity) ---
+    try:
+        with open('visual_recommendations.json', 'r') as f:
+            all_visual_recs = json.load(f)
+        visual_rec_ids = all_visual_recs.get(str(product.id), [])
+        visual_recommended_products = [p for p in all_products if p.id in visual_rec_ids]
+    except (FileNotFoundError, json.JSONDecodeError):
+        # If visual recommendations don't exist, we can just pass an empty list
+        visual_recommended_products = []
+    
+    # --- 3. PASS EVERYTHING TO THE TEMPLATE ---
     context = {
         'product': product,
-        'related_products': recommended_products,
+        'related_products': text_recommended_products, # The "Related Products" section will use text similarity
+        'visual_products': visual_recommended_products, # The new section will use this
     }
     
     return render(request, 'product-detail.html', context)
+
