@@ -266,7 +266,7 @@
         });
     });
     
-   /*==================================================================
+/*==================================================================
 [ Show modal1 ]*/
 $('.js-show-modal1').on('click', function(e) {
     e.preventDefault();
@@ -274,38 +274,43 @@ $('.js-show-modal1').on('click', function(e) {
     // Find the parent .block2 element of the button that was clicked
     var productBlock = $(this).closest('.block2');
 
-    // Get the data from the data-* attributes you added to the HTML
+    // Get all the data from the data-* attributes you added to the HTML
     var productName = productBlock.data('product-name');
     var productPrice = productBlock.data('product-price');
     var productImageUrl = productBlock.data('product-image-url');
     var productDescription = productBlock.data('product-description');
+    var productId = productBlock.data('product-id'); // <-- Get the Product ID
 
     // Find the elements inside the modal by their class names
     var modal = $('.js-modal1');
     
-    // Update the content of the modal elements with the data
-    modal.find('.js-name-detail').text(productName); // Updates the product name
-    modal.find('.mtext-106').text('$' + parseFloat(productPrice).toFixed(2)); // Updates the price
-    modal.find('.stext-102.cl3').text(productDescription); // Updates the description
-    
-    // Update the main image in the modal
+    // Update the visual content of the modal elements
+    modal.find('.js-name-detail').text(productName);
+    modal.find('.mtext-106').text('$' + parseFloat(productPrice).toFixed(2));
+    modal.find('.stext-102.cl3.p-t-23').text(productDescription);
     modal.find('.wrap-pic-w img').attr('src', productImageUrl);
-    
-    // This part updates the thumbnails for the modal's own image slider
-    // It's a bit more complex as it needs to handle the slick slider re-initialization
-    var slickTrack = modal.find('.slick3-dots');
-    slickTrack.empty(); // Clear out old thumbnails
-    
-    // This assumes you might have multiple images in the future, for now it just uses the main image
-    var newThumb = '<li><img src="' + productImageUrl + '" alt="IMG-PRODUCT"></li>';
-    slickTrack.append(newThumb);
+    modal.find('.wrap-pic-w a.flex-c-m').attr('href', productImageUrl);
 
+    // --- THIS IS THE NEW, CRITICAL PART ---
+    // Find the form inside the modal
+    var form = modal.find('form');
+    // Construct the correct URL for the form's action
+    // It will look like: /cart/add/123/
+    var newActionUrl = "/cart/add/" + productId + "/";
+    // Update the form's action attribute
+    form.attr('action', newActionUrl);
+    // --- END OF NEW PART ---
+
+    // Update the thumbnails for the modal's own image slider.
+    var slickThumbContainer = modal.find('.wrap-slick3-dots');
+    var slickDots = slickThumbContainer.find('.slick3-dots');
+    slickDots.empty();
+    
+    var newThumb = '<li class="slick-active" role="presentation"><img src="' + productImageUrl + '"><div class="slick3-dot-overlay"></div></li>';
+    slickDots.append(newThumb);
 
     // Finally, show the modal
     modal.addClass('show-modal1');
 });
-
-
-
 
 })(jQuery);

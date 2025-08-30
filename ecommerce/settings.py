@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     'products',
     'widget_tweaks',
+     'cart',
 
 ]
 
@@ -71,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart.context_processors.cart',  # Added this line
             ],
         },
     },
@@ -156,4 +158,7 @@ LOGIN_REDIRECT_URL = 'home'
 # Where to redirect users after they log out
 # (We already handled this in users/urls.py, but this is a good place for it)
 LOGOUT_REDIRECT_URL = 'home'
+
+# settings.py
+CART_SESSION_ID = 'cart'
 

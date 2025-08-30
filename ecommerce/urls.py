@@ -19,6 +19,8 @@ urlpatterns = [
 
     # This must come LAST. It handles the homepage (''), /shop/, /about/, etc.
     path('', include('core.urls')),
+
+    path('cart/', include('cart.urls', namespace='cart')),
 ]
 
 # This line is CRITICAL for making your product images appear during development

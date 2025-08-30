@@ -1,20 +1,25 @@
 # products/views.py
 from django.shortcuts import render, get_object_or_404
-from .models import Product, Category # Import your models
+from .models import Product
+from django.http import Http404 # Import Http404
 
 def product_detail(request, slug):
-    # Fetch the specific product from the database using the slug from the URL.
-    # It will only find products that are marked as available.
-    # If no product is found, it will automatically raise a 404 Page Not Found error.
-    product = get_object_or_404(Product, slug=slug, is_available=True)
+    # --- DJONGO WORKAROUND ---
+    # Step 1: Get ALL products. This is the simplest possible query.
+    all_products = Product.objects.all()
+
+    # Step 2: Now, do the filtering in pure Python.
+    product_list = [p for p in all_products if p.slug == slug and p.is_available]
+
+    # Step 3: Check if a product was found.
+    if not product_list:
+        raise Http404("Product does not exist")
+    product = product_list[0]
+    # --- END OF WORKAROUND ---
     
-     # Get related products from the same category.
-    # Exclude the current product from the list.
-    # Limit the results to the first 4 products.
+    # Get related products (other products in the same category)
     related_products = Product.objects.filter(category=product.category, is_available=True).exclude(slug=product.slug)[:4]
-    # --------------------
     
-    # This dictionary passes the found product object to the template.
     context = {
         'product': product,
         'related_products': related_products
