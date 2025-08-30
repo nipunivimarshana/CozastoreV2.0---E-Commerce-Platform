@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'users',
     'products',
     'widget_tweaks',
-     'cart',
+    'cart',
+    'recommendations',
 
 ]
 

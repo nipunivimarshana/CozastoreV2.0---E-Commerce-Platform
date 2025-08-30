@@ -1,28 +1,42 @@
 # products/views.py
-from django.shortcuts import render, get_object_or_404
+import json
+from django.shortcuts import render
 from .models import Product
-from django.http import Http404 # Import Http404
+from django.http import Http404
 
 def product_detail(request, slug):
-    # --- DJONGO WORKAROUND ---
-    # Step 1: Get ALL products. This is the simplest possible query.
+    # --- DJONGO WORKAROUND to fetch the MAIN product ---
+    # Step 1: Get ALL products with the simplest possible query.
     all_products = Product.objects.all()
 
-    # Step 2: Now, do the filtering in pure Python.
+    # Step 2: Filter for the specific product in pure Python.
     product_list = [p for p in all_products if p.slug == slug and p.is_available]
 
-    # Step 3: Check if a product was found.
+    # Step 3: Check if a product was found, otherwise raise a 404 error.
     if not product_list:
-        raise Http404("Product does not exist")
+        raise Http404("Product does not exist or is unavailable")
     product = product_list[0]
     # --- END OF WORKAROUND ---
-    
-    # Get related products (other products in the same category)
-    related_products = Product.objects.filter(category=product.category, is_available=True).exclude(slug=product.slug)[:4]
+
+    # --- RECOMMENDATION LOGIC ---
+    try:
+        with open('recommendations.json', 'r') as f:
+            all_recommendations = json.load(f)
+        
+        recommended_ids = all_recommendations.get(str(product.id), [])
+        
+        # This part is already using the safe, Python-based filter, which is great.
+        recommended_products = [p for p in all_products if p.id in recommended_ids]
+
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Fallback logic using a safe Python filter
+        all_category_products = [p for p in all_products if p.category == product.category and p.is_available and p.id != product.id]
+        recommended_products = all_category_products[:4]
+    # --- END OF RECOMMENDATION LOGIC ---
     
     context = {
         'product': product,
-        'related_products': related_products
+        'related_products': recommended_products,
     }
     
     return render(request, 'product-detail.html', context)
