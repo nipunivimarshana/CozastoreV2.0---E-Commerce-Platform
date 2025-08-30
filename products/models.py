@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse # This import is necessary
 
 # Create your models here.
 
@@ -13,6 +14,12 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+    # It's also good practice to give the Category a URL
+    def get_absolute_url(self):
+        # This assumes you might create a page to list products by category later
+        # We can just use a placeholder for now if you don't have this URL yet
+        return "#" # Or return reverse('products:product_list_by_category', args=[self.slug])
 
 
 class Product(models.Model):
@@ -33,3 +40,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    # --- THIS IS THE METHOD YOU NEED TO ADD ---
+    def get_absolute_url(self):
+        """
+        Returns the canonical URL for a single product.
+        """
+        return reverse('products:product_detail', args=[self.slug])
+    # ----------------------------------------

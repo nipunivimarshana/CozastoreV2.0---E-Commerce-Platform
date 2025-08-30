@@ -38,4 +38,4 @@ def contact(request):
     return render(request, "contact.html")
 
 def shopping_cart(request):
-    return render(request, "shoping-cart.html")
+    return render(request, "cart/detail.html")
