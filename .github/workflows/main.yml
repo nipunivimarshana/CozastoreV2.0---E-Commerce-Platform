@@ -1,0 +1,78 @@
+# .github/workflows/main.yml
+
+name: Django CI/CD Pipeline
+
+# --- 1. TRIGGER CONFIGURATION ---
+# This workflow runs on any push or pull request to the 'main' or 'develop' branches.
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+# --- 2. JOBS ---
+# A workflow is made up of one or more jobs that run in parallel or sequentially.
+jobs:
+  # --- JOB 1: BUILD AND TEST ---
+  build-and-test:
+    # The type of virtual machine to run the job on. 'ubuntu-latest' is standard and includes Chrome.
+    runs-on: ubuntu-latest
+    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Step 1.1: Checks out your repository's code so the job can access it.
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 1.2: Sets up a specific version of Python.
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # Step 1.3: Installs all project dependencies from requirements.txt.
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # Step 1.4: Runs the entire test suite. If any test fails, the job fails.
+      - name: Run Automated Tests
+        run: |
+          pytest
+  
+  # --- JOB 2: DEPLOYMENT (BLUE-GREEN SIMULATION) ---
+  deploy:
+    # This job only runs if the 'build-and-test' job above has completed successfully.
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    
+    # CRITICAL: This condition ensures deployment ONLY happens on a direct push to the 'main' branch.
+    # It will NOT run for pull requests or pushes to 'develop'.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Simulate Blue-Green Deployment
+        run: |
+          echo " Starting blue-green deployment to production..."
+          echo " Deploying new version to 'green' (inactive) environment..."
+          sleep 5 # Simulates time taken for deployment
+          echo " Running smoke tests against 'green' environment..."
+          sleep 5 # Simulates running a quick verification test
+          echo " Switching production router to send traffic to 'green'..."
+          sleep 2 # Simulates the traffic switch
+          echo " Deployment successful! 'Green' is now the new 'Blue' (live)."
+          
+  # --- JOB 3: NOTIFICATION ON FAILURE ---
+  notify-on-failure:
+    # This job only runs if the 'build-and-test' job has failed.
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Send Failure Notification
+        run: |
+          echo " Build or Test stage failed!"
+          echo " Check the logs of the 'build-and-test' job for details."
+          echo " An email notification has been automatically sent by GitHub Actions."
