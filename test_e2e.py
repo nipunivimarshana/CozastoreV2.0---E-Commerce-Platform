@@ -5,6 +5,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options # <--- IMPORT THIS
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,7 +22,20 @@ class E2ETests(StaticLiveServerTestCase):
     def setUp(self):
         """Runs once before each test in this class."""
         super().setUp()
-        self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+        
+        # --- START OF MODIFIED SECTION ---
+        # Configure Chrome options for headless execution in CI/CD
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox") # Recommended for running in a container
+        chrome_options.add_argument("--disable-dev-shm-usage") # Overcomes limited resource problems
+        
+        # Initialize the Chrome driver with the specified options
+        self.driver = webdriver.Chrome(
+            service=ChromeService(ChromeDriverManager().install()), 
+            options=chrome_options
+        )
+        # --- END OF MODIFIED SECTION ---
         
         # Create a temporary dummy image file to associate with the product
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
@@ -83,5 +97,4 @@ class E2ETests(StaticLiveServerTestCase):
         )
         # No explicit assert needed here, as the WebDriverWait itself will raise an exception if the text isn't found.
         # The test will pass if this line executes without error.
-
-
+        
