@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'Cluster0',
+        'NAME': 'Cluster0', 
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             # This securely loads the URL from your .env file
@@ -96,7 +96,15 @@ DATABASES = {
     }
 }
 
-
+# Logic to switch to a local SQLite database for testing
+import sys
+if 'test' in sys.argv or 'pytest' in str(sys.argv):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'test_database.sqlite3',
+        }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
