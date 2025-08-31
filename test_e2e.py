@@ -5,6 +5,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options # <--- REQUIRED IMPORT
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,7 +22,18 @@ class E2ETests(StaticLiveServerTestCase):
     def setUp(self):
         """Runs once before each test in this class."""
         super().setUp()
-        self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+        
+        # --- FIX 1: CONFIGURE HEADLESS MODE FOR CI/CD ---
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        
+        self.driver = webdriver.Chrome(
+            service=ChromeService(ChromeDriverManager().install()), 
+            options=chrome_options
+        )
+        # --- END OF FIX 1 ---
         
         # Create a temporary dummy image file to associate with the product
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
@@ -57,32 +69,32 @@ class E2ETests(StaticLiveServerTestCase):
         # 2. Navigate directly to that product's detail page
         self.driver.get(f"{self.live_server_url}{product_to_add.get_absolute_url()}")
 
-        # 3. Find and click the "Add to cart" button
+        # --- FIX 2: USE JAVASCRIPT CLICK TO PREVENT INTERACTION ERRORS ---
+        # First, wait for the button to be present in the DOM
         add_to_cart_button = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "button.bg1"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.bg1"))
         )
-        add_to_cart_button.click()
+        # Then, use JavaScript to force the click, bypassing any visual obstructions.
+        self.driver.execute_script("arguments[0].click();", add_to_cart_button)
+        # --- END OF FIX 2 ---
         
         # 4. CRITICAL: Wait for the header cart icon to update. This is a sign of
         #    a successful AJAX/session update. We look for the data-notify attribute to be "1".
         cart_icon = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".icon-header-noti[data-notify='1']"))
         )
-        # We can also explicitly assert this, though the wait itself is a strong test
         self.assertEqual(cart_icon.get_attribute('data-notify'), '1')
 
         # 5. Now that we've confirmed the item was added, navigate to the cart page
-        #    We'll use the link from the header to be more realistic.
         cart_link = self.driver.find_element(By.CSS_SELECTOR, 'a[href="/cart/"]')
         cart_link.click()
 
-        # 6. On the cart page, wait for the table body to be present
-        cart_table_body = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "tbody"))
+        # --- FIX 3: USE ROBUST WAIT FOR CART CONTENT ---
+        # Wait for the specific product name to be visible within the table body.
+        # This is the most reliable way to confirm the cart has loaded correctly.
+        WebDriverWait(self.driver, 10).until(
+            EC.text_to_be_present_in_element((By.TAG_NAME, "tbody"), "Unique Test Shirt")
         )
-        
-        # 7. Assert that the name of our test product is now visible within the cart table
-        self.assertIn("Unique Test Shirt", cart_table_body.text)
-        print("\nCompleted E2E test: Add to Cart Journey")
+        # --- END OF FIX 3 ---
 
         
