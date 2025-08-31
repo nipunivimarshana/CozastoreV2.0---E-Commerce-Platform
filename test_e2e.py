@@ -76,13 +76,12 @@ class E2ETests(StaticLiveServerTestCase):
         cart_link = self.driver.find_element(By.CSS_SELECTOR, 'a[href="/cart/"]')
         cart_link.click()
 
-        # 6. On the cart page, wait for the table body to be present
-        cart_table_body = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "tbody"))
+        # 6. On the cart page, wait for the specific product name to be visible within the table body.
+        # This explicitly waits for the content to be loaded by JavaScript.
+        WebDriverWait(self.driver, 10).until(
+            EC.text_to_be_present_in_element((By.TAG_NAME, "tbody"), "Unique Test Shirt")
         )
-        
-        # 7. Assert that the name of our test product is now visible within the cart table
-        self.assertIn("Unique Test Shirt", cart_table_body.text)
-        print("\nCompleted E2E test: Add to Cart Journey")
+        # No explicit assert needed here, as the WebDriverWait itself will raise an exception if the text isn't found.
+        # The test will pass if this line executes without error.
 
-        
+
