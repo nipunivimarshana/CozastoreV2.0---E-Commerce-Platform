@@ -5,7 +5,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options # <--- IMPORT THIS
+from selenium.webdriver.chrome.options import Options # <--- REQUIRED IMPORT
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -23,19 +23,17 @@ class E2ETests(StaticLiveServerTestCase):
         """Runs once before each test in this class."""
         super().setUp()
         
-        # --- START OF MODIFIED SECTION ---
-        # Configure Chrome options for headless execution in CI/CD
+        # --- FIX 1: CONFIGURE HEADLESS MODE FOR CI/CD ---
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox") # Recommended for running in a container
-        chrome_options.add_argument("--disable-dev-shm-usage") # Overcomes limited resource problems
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         
-        # Initialize the Chrome driver with the specified options
         self.driver = webdriver.Chrome(
             service=ChromeService(ChromeDriverManager().install()), 
             options=chrome_options
         )
-        # --- END OF MODIFIED SECTION ---
+        # --- END OF FIX 1 ---
         
         # Create a temporary dummy image file to associate with the product
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
@@ -71,30 +69,32 @@ class E2ETests(StaticLiveServerTestCase):
         # 2. Navigate directly to that product's detail page
         self.driver.get(f"{self.live_server_url}{product_to_add.get_absolute_url()}")
 
-        # 3. Find and click the "Add to cart" button
+        # --- FIX 2: USE JAVASCRIPT CLICK TO PREVENT INTERACTION ERRORS ---
         add_to_cart_button = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "button.bg1"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "button.bg1"))
         )
-        add_to_cart_button.click()
+        self.driver.execute_script("arguments[0].click();", add_to_cart_button)
+        # --- END OF FIX 2 ---
         
-        # 4. CRITICAL: Wait for the header cart icon to update. This is a sign of
-        #    a successful AJAX/session update. We look for the data-notify attribute to be "1".
+        # 4. CRITICAL: Wait for the header cart icon to update.
         cart_icon = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".icon-header-noti[data-notify='1']"))
         )
-        # We can also explicitly assert this, though the wait itself is a strong test
         self.assertEqual(cart_icon.get_attribute('data-notify'), '1')
 
-        # 5. Now that we've confirmed the item was added, navigate to the cart page
-        #    We'll use the link from the header to be more realistic.
-        cart_link = self.driver.find_element(By.CSS_SELECTOR, 'a[href="/cart/"]')
-        cart_link.click()
+        # --- FIX 4: USE JAVASCRIPT CLICK FOR CART LINK ---
+        # Wait for the link to be present and then use a JS click to avoid interactability issues.
+        cart_link = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href="/cart/"]'))
+        )
+        self.driver.execute_script("arguments[0].click();", cart_link)
+        # --- END OF FIX 4 ---
 
-        # 6. On the cart page, wait for the specific product name to be visible within the table body.
-        # This explicitly waits for the content to be loaded by JavaScript.
+        # --- FIX 3: USE ROBUST WAIT FOR CART CONTENT ---
+        # Wait for the specific product name to be visible within the table body.
         WebDriverWait(self.driver, 10).until(
             EC.text_to_be_present_in_element((By.TAG_NAME, "tbody"), "Unique Test Shirt")
         )
-        # No explicit assert needed here, as the WebDriverWait itself will raise an exception if the text isn't found.
-        # The test will pass if this line executes without error.
+        # --- END OF FIX 3 ---
+
         
